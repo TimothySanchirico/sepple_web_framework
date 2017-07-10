@@ -7,6 +7,7 @@ Server::Server(const char * port): sock(std::string(port)){
 void Server::run(){
    sock.listen();
    Socket * client = nullptr;
+   sock.get_address();
    while(420){
         if((client= sock.accept())){
             start_client_thread(client);
@@ -14,20 +15,31 @@ void Server::run(){
    }
 }
 
+
 void Server::start_client_thread(Socket * client){
     // Create Request;
     char * rd_buf;
     size_t n;
     std::tie(rd_buf, n) = client->recieve();
+    // TODO Just return the string from recieve ....
     std::string req(rd_buf, n);
-    size_t l, r;
-    l = req.find_first_of(' ', 0);
-    r = req.find_first_of(' ', l+1);
-    const std::string route = req.substr(l+1, (r-l-1));
-    std::cout << route  << std::endl;
-    RouteHandler f = routes.get(route);
-    client->send(f(std::string("Hi")));
-    client->close();
+    Request & request = *(new Request(req));
+    handler_dispatch(*client, request);
+}
 
+void Server::handler_dispatch(Socket & client, Request & r){
+    std::string route = r.get_end_pt();
+    printf("Endpoint:%s\n", route.c_str());
+    RouteHandler & f = routes.get(route);
+    Response res = f(r);
+    client.send(res.get_header());
+    client.send(res.str());
+    client.close();
+    delete &client;
+    delete &r;
+}
+
+void Server::set_default_handler(RouteHandler rh){
+    routes.set_default_data(rh);
 }
 

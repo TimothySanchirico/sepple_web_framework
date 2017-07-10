@@ -2,7 +2,7 @@
 // PrefixNode
 template <typename T>
 PrefixNode<T>::PrefixNode(T & t) : d_set(true), data(t){
-    for(size_t i = 0; i < 26;) 
+    for(size_t i = 0; i < 257;) 
         children[i++] = nullptr;
 }
 
@@ -72,12 +72,15 @@ T & PrefixTree<T>::get(const std::string & key) const {
 
 template<typename T>
 T & PrefixTree<T>::_get(PrefixNode<T> * r, const std::string & s, size_t i) const {
-    if(i == s.size()-1)
-        return (*r)[s[i]]->get_data();
+    if(i == s.size()-1){
+        if((*r)[s[i]] == nullptr)
+            return root->get_data();
+        return (*r)[s[i]]->has_data()? (*r)[s[i]]->get_data() : root->get_data();
+    }
     else{
         if((*r)[s[i]] == nullptr)
             return root->get_data();
-        return _get((*r)[s[i]], s, i+1);
+        else return _get((*r)[s[i]], s, i+1);
     }
 }
 
@@ -98,3 +101,8 @@ void PrefixTree<T>::_delete(PrefixNode<T> * r){
     }
 }
 
+
+template <typename T>
+void PrefixTree<T>::set_default_data(T n){
+    root->set_data(n);
+}

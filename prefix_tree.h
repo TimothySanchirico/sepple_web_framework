@@ -14,6 +14,7 @@ struct PrefixNode {
         PrefixNode<T> * & operator [](size_t i);
         void set_data(T & t);
         T & get_data();
+        bool has_data(){ return d_set; }
 
     private:
         T data;
@@ -32,6 +33,8 @@ class PrefixTree {
         T & get(const std::string & key) const;
 
         ~PrefixTree<T>();
+        
+        void set_default_data(T n);
 
     private:
         PrefixNode<T> * root;

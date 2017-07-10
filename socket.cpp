@@ -68,3 +68,11 @@ void Socket::send(std::string req){
 void Socket::close(){
     ::close(sockfd);
 }
+
+void Socket::get_address(){
+    struct sockaddr_in sa;
+    socklen_t sa_l = sizeof(sa);
+    getsockname(sockfd, (struct sockaddr *) &sa, &sa_l);
+    printf("Local IP: %s\n", inet_ntoa(sa.sin_addr));
+    printf("Local port: %d\n", (int)ntohs(sa.sin_port));
+}

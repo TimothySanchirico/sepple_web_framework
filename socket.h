@@ -37,6 +37,8 @@ class Socket {
         
         void close();
 
+        void get_address();
+
     private:
         
         int sockfd;

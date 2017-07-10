@@ -1,11 +1,20 @@
 #include "shrek++.h"
 #include <iostream>
 
+Response index_get(Request & r){
+    return Response("GET REQUEST HELLO WORLD!");
+}
 
 int main(void){
         Server s("5000");
-        s.add_route("/index.html", [](std::string r){
-                return std::string("HTTP/1.1 200 OK\r\n\r\nHello World!\n"); 
+        s.set_default_handler([](Request &r){
+                return Response("404 Not Found", HTTPStatus::NOT_FOUND);
+        });
+        s.add_route("/index.html", [](Request &r){
+                if(r.type == HTTPRequest::GET)
+                    return index_get(r);
+                else
+                    return Response("Hello World!");
         });
         s.run();
 

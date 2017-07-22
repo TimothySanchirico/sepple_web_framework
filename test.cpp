@@ -11,6 +11,7 @@ int main(void){
                 return Response("404 Not Found", HTTPStatus::NOT_FOUND);
         });
         s.add_route("/index.html", [](Request &r){
+                std::cout << r.get_raw_data() << std::endl;
                 if(r.type == HTTPRequest::GET)
                     return index_get(r);
                 else

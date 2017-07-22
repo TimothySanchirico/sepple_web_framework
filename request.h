@@ -34,10 +34,12 @@ class Request {
 
         EndPoint & get_end_pt();
         RequestType type;
+        std::string & get_raw_data();
     private:
         void parse_raw(std::string & s);
         inline size_t set_req_type(std::string & s);
         inline size_t set_end_pt(std::string & s, size_t r);
+        std::string data;
         EndPoint ep;
 };
 

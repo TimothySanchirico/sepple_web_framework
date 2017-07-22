@@ -14,6 +14,7 @@ namespace HTTPRequest {
 
 Request::Request(std::string s){
     parse_raw(s);
+    data = s;
 }
 
 
@@ -40,6 +41,11 @@ inline size_t Request::set_end_pt(std::string & s, size_t _r){
 
 
 EndPoint & Request::get_end_pt(){ return ep; }
+
+
+std::string & Request::get_raw_data(){
+    return data;
+}
 
 
 Request::~Request(){

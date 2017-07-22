@@ -23,7 +23,7 @@ std::string & Response::str(){
 std::string & Response::get_header(){
     char buf[300];
     size_t n = std::sprintf(buf, "HTTP/1.1 %s\r\n\r\n", status_message.c_str());
-    header=std::string(buf, n-1);
+    header=std::string(buf, n);
     return header;
 }
 

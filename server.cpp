@@ -24,24 +24,29 @@ void Server::start_client_thread(Socket * client){
     // TODO Just return the string from recieve ....
     std::string req(rd_buf, n);
     Request & request = *(new Request(req));
-    handler_dispatch(*client, request);
+    ClientInfo * ci = new ClientInfo(new Request(req), client, this);
+    pthread_t client_thread;
+    pthread_create(&client_thread,
+        nullptr, &Server::handler_dispatch, (void*)ci);
+    pthread_detach(client_thread); // Let it run loose and clean itself
 }
 
 
-void Server::handler_dispatch(Socket & client, Request & r){
-    std::string route = r.get_end_pt();
+
+void *Server::handler_dispatch(void * void_ci){
+    ClientInfo * ci = (ClientInfo *)void_ci;
+    Server & server = *ci->me;
+    Request & req = ci->req;
+    Socket & client = ci->client;
+    std::string route = req.get_end_pt();
     printf("Endpoint:%s\n", route.c_str());
-    RouteHandler & f = routes.get(route);
-    Response res = f(r);
-    
+    RouteHandler & f = server.get_route(route);
+    Response res = f(req);
     client.send(res.get_header());
-   // std::cout << "sent header" << std::endl;
     client.send(res.str());
-    std::cout << "sent body:" << std::endl;
-    std::cout << res.str() << std::endl;
     client.close();
-    delete &client;
-    delete &r;
+    delete ci;
+    pthread_exit(NULL);
 }
 
 

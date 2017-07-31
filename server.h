@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <string>
+#include <pthread.h>
 
 #include "socket.h"
 #include "request.h"
@@ -28,10 +29,29 @@ class Server {
 
         void set_default_handler(RouteHandler rh);
 
-    private:
-        void start_client_thread(Socket * client);
+        RouteHandler & get_route(std::string route){
+            return routes.get(route);
+        }
 
-        void handler_dispatch(Socket & client, Request & r);
+        struct ClientInfo {
+            ClientInfo(Request * r, Socket * c, Server * s): req(*r), client(*c){
+                me = s;
+            }
+            ~ClientInfo(){
+                delete &client;
+                delete &req;
+            }
+            Server * me; // pointer to the server
+            Request & req;
+            Socket & client;
+        };
+
+        static void *handler_dispatch(void * ci);
+
+    private:
+        pthread_t dispatch_thread;
+
+        void start_client_thread(Socket * client);
 
         Request get_HTTP_request(Socket * client);
 
@@ -40,6 +60,9 @@ class Server {
         Socket sock;
 
 };
+
+
+
 
 #endif
 

@@ -33,7 +33,7 @@ void Response::set_status_message(){
             status_message = std::string("200 OK");
             break;
         case(HTTPStatus::INTERNAL_ERR):
-            status_message = std::string("500 LOL FUCK");
+            status_message = std::string("500 INTERNAL");
             break;
         case(HTTPStatus::NOT_FOUND):
             status_message = std::string("404 NOT FOUND");

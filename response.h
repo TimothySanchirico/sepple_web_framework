@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 
 typedef unsigned short statusCode;
 typedef std::string statusMessage;
@@ -13,6 +14,13 @@ namespace HTTPStatus {
     extern const statusCode OK;
     extern const statusCode NOT_FOUND;
     extern const statusCode INTERNAL_ERR;
+}
+
+inline std::string render_template(const char * fname) {
+    std::ifstream f(fname);
+    std::string s((std::istreambuf_iterator<char>(f)),
+        std::istreambuf_iterator<char>());
+    return s;
 }
 
 class Response {
@@ -34,3 +42,4 @@ class Response {
 };
 
 #endif
+

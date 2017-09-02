@@ -12,7 +12,7 @@ namespace HTTPRequest {
 }
 
 
-Request::Request(std::string s){
+Request::Request(std::string&& s){
     parse_raw(s);
     data = s;
 }
@@ -47,6 +47,11 @@ std::string & Request::get_raw_data(){
     return data;
 }
 
+//TODO
+// Split at =, add to prefix tree
+void Request::load_cookies(void){
+    
+}
 
 Request::~Request(){
 

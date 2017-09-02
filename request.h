@@ -2,6 +2,7 @@
 #define REQUEST_H
 
 #include <string>
+#include "prefix_tree.h"
 
 typedef unsigned short RequestType;
 
@@ -29,7 +30,7 @@ inline RequestType type_string_hash(std::string & s){
 
 class Request {
     public:
-        Request(std::string r);
+        Request(std::string&& r);
         ~Request();
 
         EndPoint & get_end_pt();
@@ -41,6 +42,8 @@ class Request {
         inline size_t set_end_pt(std::string & s, size_t r);
         std::string data;
         EndPoint ep;
+        void load_cookies(); // TODO
+        PrefixTree<std::string> session;
 };
 
 #endif

@@ -17,14 +17,7 @@ void Server::run(){
 
 
 void Server::start_client_thread(Socket * client){
-    // Create Request;
-    char * rd_buf;
-    size_t n;
-    std::tie(rd_buf, n) = client->recieve();
-    // TODO Just return the string from recieve ....
-    std::string req(rd_buf, n);
-    Request & request = *(new Request(req));
-    ClientInfo * ci = new ClientInfo(new Request(req), client, this);
+    ClientInfo * ci = new ClientInfo(new Request(client->recieve()), client, this);
     pthread_t client_thread;
     pthread_create(&client_thread,
         nullptr, &Server::handler_dispatch, (void*)ci);
@@ -34,10 +27,10 @@ void Server::start_client_thread(Socket * client){
 
 
 void *Server::handler_dispatch(void * void_ci){
-    ClientInfo * ci = (ClientInfo *)void_ci;
-    Server & server = *ci->me;
-    Request & req = ci->req;
-    Socket & client = ci->client;
+    std::unique_ptr<ClientInfo> ci((ClientInfo *)void_ci);
+    Server & server = *(ci->me);
+    Request & req   = *(ci->req);
+    Socket & client = *(ci->client);
     std::string route = req.get_end_pt();
     printf("Endpoint:%s\n", route.c_str());
     RouteHandler & f = server.get_route(route);
@@ -45,7 +38,6 @@ void *Server::handler_dispatch(void * void_ci){
     client.send(res.get_header());
     client.send(res.str());
     client.close();
-    delete ci;
     pthread_exit(NULL);
 }
 

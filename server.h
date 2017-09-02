@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <pthread.h>
 
@@ -16,6 +17,8 @@ typedef std::function<Response(Request&)> RouteHandler;
 typedef PrefixTree<RouteHandler> Routes;
 
 
+// Could derive from enable_shared_from_this...
+// probably not worth tho...
 class Server {
     public:
         Server(const char * port);
@@ -34,16 +37,11 @@ class Server {
         }
 
         struct ClientInfo {
-            ClientInfo(Request * r, Socket * c, Server * s): req(*r), client(*c){
-                me = s;
+            ClientInfo(Request * r, Socket * c, Server * s): req(r), client(c), me(s){
             }
-            ~ClientInfo(){
-                delete &client;
-                delete &req;
-            }
-            Server * me; // pointer to the server
-            Request & req;
-            Socket & client;
+            Server*                     me;
+            std::unique_ptr<Request>    req;
+            std::unique_ptr<Socket>     client;
         };
 
         static void *handler_dispatch(void * ci);

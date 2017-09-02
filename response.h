@@ -2,9 +2,11 @@
 #define RESPONSE_H
 
 #include <string>
+#include <vector>
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include "cookie.h"
 
 typedef unsigned short statusCode;
 typedef std::string statusMessage;
@@ -32,8 +34,12 @@ class Response {
 
         std::string & get_header();
 
+        // Template for any value with string cast
+        void set_session_var(std::string name, std::string value);
+
         ~Response(){}
     private:
+        std::vector<Cookie> cookies;
         void set_status_message();
         statusMessage status_message;
         statusCode status_code;

@@ -1,7 +1,7 @@
 #include "socket.h"
 
 
-Socket::Socket(std::string port){
+Socket::Socket(std::string&& port){
     struct addrinfo hints, *servinfo, *p;
 
     memset(&hints, 0, sizeof(hints));
@@ -50,12 +50,12 @@ Socket * Socket::accept(){
 }
 
 
-std::pair<char *, size_t> Socket::recieve(void){
+std::string Socket::recieve(void){
     char * buf = new char[2048];
     size_t n;
     n = recv(sockfd, buf, 2047, 0);
     buf[n] = '\0'; // pretty much useless
-    return std::make_pair(buf, n); 
+    return std::string(buf,n);
 }
 
 

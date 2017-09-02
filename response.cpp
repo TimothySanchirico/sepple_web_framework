@@ -21,9 +21,15 @@ std::string & Response::str(){
 }
 
 std::string & Response::get_header(){
-    char buf[300];
-    size_t n = std::sprintf(buf, "HTTP/1.1 %s\r\n\r\n", status_message.c_str());
+    char buf[1024];
+    size_t n = std::sprintf(buf, "HTTP/1.1 %s\r\n", status_message.c_str());
+    for(auto & cookie : cookies){
+        n += std::sprintf(buf + n, "Set-Cookie: %s=%s\r\n",
+                cookie.name.c_str(), cookie.value.c_str());
+    }
+    n += std::sprintf(buf + n, "\r\n\r\n");
     header=std::string(buf, n);
+    printf("Response Header:\n%s", header.c_str());
     return header;
 }
 
@@ -39,4 +45,8 @@ void Response::set_status_message(){
             status_message = std::string("404 NOT FOUND");
             break;
     }
+}
+
+void Response::set_session_var(std::string name, std::string value){
+    cookies.push_back(Cookie(name, value));
 }

@@ -23,13 +23,13 @@
 typedef struct sockaddr_in ClientAddress;
 class Socket {
     public:
-        Socket(std::string port);
+        Socket(std::string&& port);
 
         Socket(int fd, ClientAddress client);
         
         void send(std::string res);
 
-        std::pair<char *, size_t> recieve();
+        std::string recieve();
 
         Socket* accept();
 

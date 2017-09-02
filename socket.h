@@ -39,6 +39,8 @@ class Socket {
 
         void get_address();
 
+        std::string get_client_address();
+
     private:
         
         int sockfd;

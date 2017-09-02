@@ -30,6 +30,7 @@ class Response {
         Response(char const * s, statusCode status=200);
         Response(std::string s, statusCode status=200);
 
+        std::string get_status_message(){ return status_message; }
         std::string & str();
 
         std::string & get_header();

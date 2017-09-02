@@ -32,9 +32,10 @@ void *Server::handler_dispatch(void * void_ci){
     Request & req   = *(ci->req);
     Socket & client = *(ci->client);
     std::string route = req.get_end_pt();
-    printf("Endpoint:%s\n", route.c_str());
     RouteHandler & f = server.get_route(route);
     Response res = f(req);
+    std::string client_string = client.get_client_address();
+    printf("[%s]: %s -- %s\n", res.get_status_message().c_str(), client_string.c_str(), route.c_str());
     client.send(res.get_header());
     client.send(res.str());
     client.close();

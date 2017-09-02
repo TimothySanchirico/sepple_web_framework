@@ -29,7 +29,6 @@ std::string & Response::get_header(){
     }
     n += std::sprintf(buf + n, "\r\n\r\n");
     header=std::string(buf, n);
-    printf("Response Header:\n%s", header.c_str());
     return header;
 }
 

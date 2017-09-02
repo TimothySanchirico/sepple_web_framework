@@ -77,3 +77,11 @@ void Socket::get_address(){
     printf("Local IP: %s\n", inet_ntoa(sa.sin_addr));
     printf("Local port: %d\n", (int)ntohs(sa.sin_port));
 }
+
+std::string Socket::get_client_address(){
+    char buf[128];
+    size_t n;
+    n = sprintf(buf, "%s:%d", inet_ntoa(c.sin_addr), (int)ntohs(c.sin_port));
+    return std::string(buf, n);
+
+}

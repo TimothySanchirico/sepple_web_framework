@@ -51,11 +51,13 @@ Socket * Socket::accept(){
 
 
 std::string Socket::recieve(void){
-    char * buf = new char[2048];
+    std::vector<char> buffer(2048);
     size_t n;
-    n = recv(sockfd, buf, 2047, 0);
-    buf[n] = '\0'; // pretty much useless
-    return std::string(buf,n);
+    n = recv(sockfd, buffer.data(), 2047, 0);
+    buffer[n] = '\0'; // pretty much useless
+    std::string rcv;
+    rcv.append(buffer.cbegin(), buffer.cend());
+    return rcv;
 }
 
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <pthread.h>
+#include <unistd.h>
 
 #include "socket.h"
 #include "request.h"
@@ -17,11 +18,16 @@ typedef std::function<Response(Request&)> RouteHandler;
 typedef PrefixTree<RouteHandler> Routes;
 
 
-// Could derive from enable_shared_from_this...
-// probably not worth tho...
-class Server {
+class Server : public std::enable_shared_from_this<Server> {
     public:
+
+        // Should probably make private
         Server(const char * port);
+
+        template<typename... Ts>
+            static std::shared_ptr<Server> create(Ts&&... params){
+                    return std::make_shared<Server>(std::forward<Ts>(params)...);
+                    }
 
         void run();
 
@@ -37,16 +43,18 @@ class Server {
         }
 
         struct ClientInfo {
-            ClientInfo(Request * r, Socket * c, Server * s): req(r), client(c), me(s){
+            ClientInfo(std::shared_ptr<Request> r, std::shared_ptr<Socket> c, 
+                    std::shared_ptr<Server> s): req(r), client(c), me(s){
             }
-            Server*                     me;
-            std::unique_ptr<Request>    req;
-            std::unique_ptr<Socket>     client;
+            std::shared_ptr<Server>         me;
+            std::shared_ptr<Request>    req;
+            std::shared_ptr<Socket>     client;
         };
 
         static void *handler_dispatch(void * ci);
 
     private:
+
         pthread_t dispatch_thread;
 
         void start_client_thread(Socket * client);

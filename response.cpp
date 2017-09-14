@@ -27,7 +27,7 @@ std::string & Response::get_header(){
         n += std::sprintf(buf + n, "Set-Cookie: %s=%s\r\n",
                 cookie.name.c_str(), cookie.value.c_str());
     }
-    n += std::sprintf(buf + n, "\r\n\r\n");
+    n += std::sprintf(buf + n, "\r\n");
     header=std::string(buf, n);
     return header;
 }

@@ -9,9 +9,9 @@ SRC_DIR = src/
 LIBS = -lgtest -lgtest_main -lpthread
 
 http-request.o:  src/http_request.*
-	$(CXX) -c -o http-request.o src/http_request.C $(SHREKXXFLAGS)
+	$(CXX) -c -o build/http-request.o src/http_request.C $(SHREKXXFLAGS)
 
 request-test: test/request.C http-request.o
-	$(CXX) -o request-test test/request.C http-request.o $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./request-test
+	$(CXX) -o build/request-test test/request.C build/http-request.o $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./build/request-test
 
 

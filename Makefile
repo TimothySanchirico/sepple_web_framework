@@ -8,13 +8,13 @@ SHREKXXFLAGS = -std=c++17 -ggdb3
 SRC_DIR = src/
 LIBS = -lgtest -lgtest_main -lpthread -lgmock
 
-http-request.o:  src/http_request.*
-	$(CXX) -c -o build/http-request.o src/http_request.C $(SHREKXXFLAGS)
+http-request.o:  src/http_request.C src/http_request.H
+	$(CXX) -c -o build/$@ $< $(SHREKXXFLAGS)
 
 request-test: test/request.C http-request.o
-	$(CXX) -o build/request-test test/request.C build/http-request.o $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./build/request-test
+	$(CXX) -o build/$@ $< build/http-request.o $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./build/$@
 
-route-handler-test: test/route_handler_test.C request-test src/route_handler.H
-	$(CXX) -o build/route-handler-test test/route_handler_test.C build/http-request.o $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./build/route-handler-test
+route-handler-test: test/route_handler_test.C src/route_handler.H request-test 
+	$(CXX) -o build/$@ $< build/http-request.o $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./build/$@
 
 

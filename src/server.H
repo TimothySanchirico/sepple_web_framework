@@ -1,6 +1,11 @@
 #pragma once
 
-#include <unorder_map>
+#include "route_handler.H"
+
+#include <iostream>
+#include <memory>
+#include <optional>
+#include <unordered_map>
 
 namespace shrek {
 
@@ -9,12 +14,11 @@ template <typename network_layer,
           template <typename...> typename route_handlerT, typename request,
           typename response>
 struct server {
-    using maybe_response = std::optional<responseT<session_data>>;
-    using route_handler  = route_handlerT<request, response>;
-    using client_id      = typename network_layer::client_id;
-    using connection     = typename network_layer::connection;
+    using route_handler = route_handlerT<request, response>;
+    using client_id     = typename network_layer::client_id;
+    using connection    = typename network_layer::connection;
 
-    server(const network_layer& network, route_handler&&);
+    server(network_layer& network, auto&& rh);
 
     struct client {
         client(server*, connection*);
@@ -32,42 +36,45 @@ struct server {
     void on_disconnection(const client_id&) {}
 
   private:
-    network_layer* const                                   network_;
     route_handler                                          route_handler_;
     std::unordered_map<client_id, std::unique_ptr<client>> clients_;
 };
 
 #define SERVER_TEMPLATE_ARGS                                                   \
-    template <typename session_data, typename network_layer,                   \
+    template <typename network_layer,                                          \
               template <typename...> typename route_handlerT,                  \
-              typename requestT, typename responseT>
+              typename request, typename response>
 
-#define SERVER_T                                                               \
-    server<session_data, network_layer, route_handlerT, requestT, responseT>
+#define SERVER_T server<network_layer, route_handlerT, request, response>
 
 SERVER_TEMPLATE_ARGS
-inline SERVER_T::server(const network_layer& l, route_handler&& r)
-    : network_{l}, route_handler_{std::move(r)} {
+inline SERVER_T::server(network_layer& l, auto&& r)
+    : route_handler_{std::forward<decltype(r)>(r)} {
     l.listen(this);
 }
 
+SERVER_TEMPLATE_ARGS
 inline void SERVER_T::on_connection(const client_id& id, connection* con) {
     auto r =
-        clients_.emplace(std::piecewise_construct, std::forward_as_tuple{id},
-                         std::forward_as_tuple{this, con});
+        clients_.emplace(std::piecewise_construct, std::forward_as_tuple(id),
+                         std::forward_as_tuple(new client{this, con}));
     if (r.second == false) {
-        std::cout << " > 1 connection with the same client_id=" << client_id << std::endl;
+        std::cout << " > 1 connection with the same client_id=" << id
+                  << std::endl;
     }
 }
 
 SERVER_TEMPLATE_ARGS
 inline SERVER_T::client::client(SERVER_T* s, connection* c)
-    : connection_{c}, parent_{s} {}
+    : connection_{c}, parent_{s} {
+    connection_->listen(this);
+}
 
 SERVER_TEMPLATE_ARGS
 inline void SERVER_T::client::on_data(const uint8_t* data, uint32_t len) {
-    auto&& req = request::servialize(data, len);
-    route_handler_.dispatch(req);
+    auto empty_metadata = 0;
+    auto&& req = request::serialize(data, len, empty_metadata);
+    parent_->route_handler_.dispatch(this, req);
 }
 
 SERVER_TEMPLATE_ARGS
@@ -76,7 +83,7 @@ inline void SERVER_T::client::send(const response& s) {
     connection_->send(data, len);
 }
 
-#undefine SERVER_TEMPLATE_ARGS
-#undefine SERVER_T
+#undef SERVER_TEMPLATE_ARGS
+#undef SERVER_T
 
 } // namespace shrek

@@ -7,11 +7,16 @@
 
 #include <cstdint>
 
+#include "http.H"
 #include "util.H"
 
 namespace shrek {
 
 struct http_request {
+
+    using request_type = http::request_type;
+    using http_version = http::http_version;
+
     static http_request serialize(const uint8_t* data, uint32_t len,
                                   auto&& metadata);
 
@@ -22,20 +27,7 @@ struct http_request {
     const auto&       cookies() const { return cookies_; }
     const auto&       data() const { return data_; }
 
-    enum class request_type { INVALID, GET, POST, UNHANDLED };
-    enum class http_version { INVALID, HTTP_1, HTTP_1_1, UNHANDLED };
-
-    static std::string type_string(request_type);
-    static std::string version_string(http_version);
-
-    static request_type make_type(const std::string&);
-    static http_version make_version(const std::string&);
-
     friend std::ostream& operator<<(std::ostream&, const http_request&);
-    friend std::ostream& operator<<(std::ostream&,
-                                    http_request::request_type);
-    friend std::ostream& operator<<(std::ostream&,
-                                    http_request::http_version);
 
   private:
     http_request() = default;
@@ -57,7 +49,7 @@ inline http_request http_request::serialize(const uint8_t* data, uint32_t len,
 
     std::string t;
     stream >> t;
-    req.type_ = make_type(t);
+    req.type_ = http::make_type(t);
 
     std::string r;
     stream >> r;
@@ -65,7 +57,7 @@ inline http_request http_request::serialize(const uint8_t* data, uint32_t len,
 
     std::string v;
     stream >> v;
-    req.version_ = make_version(v);
+    req.version_ = http::make_version(v);
 
     // TODO fill in the other fields
 

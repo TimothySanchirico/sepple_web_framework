@@ -70,15 +70,13 @@ mock_response::serialize(const mock_response& r) {
     return {reinterpret_cast<const uint8_t*>(r.data_.data()), r.data_.size()};
 }
 
+
 struct server_test : public testing::Test {
     virtual void SetUp() override;
     virtual void TearDown() override {}
 
     using request         = shrek::http_request;
     using route_handler_t = shrek::route_handler<request, mock_response>;
-
-    // toda
-    request create_request(const std::string& endpoint);
 
     using server_t = shrek::server<mock_network_layer, shrek::route_handler,
                                    request, mock_response>;

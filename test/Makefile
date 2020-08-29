@@ -19,4 +19,15 @@ route-handler-test: route_handler_test.C $(SRC_DIR)/route_handler.H request-test
 server-test: server_test.C route-handler-test
 	$(CXX) -o $(BUILD_DIR)/$@ $< $(BUILD_DIR)/http-request.o $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./$(BUILD_DIR)/$@
 
+libnetbridge: mock_network_bridge.C
+	$(CXX) $< -o $(BUILD_DIR)/$@.so -fPIC -shared -ldl -D_GNU_SOURCE $(SHREKXXFLAGS)
+
+libnetpreload: network_preload.C libnetbridge
+	$(CXX) $< -o $(BUILD_DIR)/libnetpreload.so -lnetbridge -L $(BUILD_DIR) -fPIC -shared -ldl -D_GNU_SOURCE $(SHREKXXFLAGS)
+
+network-test: netmocks_test.C libnetpreload
+	$(CXX) -o $(BUILD_DIR)/$@ $< $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) -lnetbridge -L $(BUILD_DIR) \
+&& LD_PRELOAD=$(BUILD_DIR)/libnetpreload.so ./$(BUILD_DIR)/$@
+
+
 test-all: request-test route-handler-test server-test

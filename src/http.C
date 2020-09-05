@@ -63,5 +63,14 @@ std::ostream& operator<<(std::ostream& os, http_version v) {
     return os;
 }
 
+std::string reason_phrase(status_code sc) {
+    switch (sc) {
+    case status_code::OK:
+        return "OK";
+    default:
+        return "Unhandled";
+    }
+}
+
 } // namespace http
 } // namespace shrek

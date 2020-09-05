@@ -107,8 +107,7 @@ TEST_F(server_test, basic_connection_and_response) {
                             "User-Agent: curl/7.58.0\n"
                             "Accept: */*\n"
                             "\n";
-    auto p       = network_layer.create_connection();
-    auto [id, c] = p;
+    auto [id, c] = network_layer.create_connection();
     responder    = [](const request&) { return mock_response{"hello world"}; };
     // todo actually match the hello world
     EXPECT_CALL(*c, send(_, _)).Times(1);

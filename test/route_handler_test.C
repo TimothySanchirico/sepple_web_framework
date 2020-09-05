@@ -37,7 +37,7 @@ route_handler_test::create_request(const std::string& endpoint) {
                                        "Accept: */*\n"
                                        "\n";
     auto empty_meta_data = 0;
-    auto req             = request::serialize(
+    auto req             = request::deserialize(
         reinterpret_cast<const uint8_t*>(sample_request.data()),
         sample_request.size(), empty_meta_data);
     return req;

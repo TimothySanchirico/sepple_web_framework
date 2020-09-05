@@ -13,7 +13,7 @@ TEST_F(http_request_test, basic_serialize) {
                                        "Accept: */*\n"
                                        "\n";
     auto empty_meta_data = 0;
-    auto req = shrek::http_request::serialize(reinterpret_cast<const uint8_t*>(sample_request.data()), sample_request.size(), empty_meta_data);
+    auto req = shrek::http_request::deserialize(reinterpret_cast<const uint8_t*>(sample_request.data()), sample_request.size(), empty_meta_data);
     ASSERT_EQ(req.type(), shrek::http::request_type::GET);
     ASSERT_EQ(req.version(), shrek::http::http_version::HTTP_1_1);
     ASSERT_EQ(req.endpoint(), "/");

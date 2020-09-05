@@ -73,7 +73,7 @@ inline SERVER_T::client::client(SERVER_T* s, connection* c)
 SERVER_TEMPLATE_ARGS
 inline void SERVER_T::client::on_data(const uint8_t* data, uint32_t len) {
     auto empty_metadata = 0;
-    auto&& req = request::serialize(data, len, empty_metadata);
+    auto&& req = request::deserialize(data, len, empty_metadata);
     parent_->route_handler_.dispatch(this, req);
 }
 

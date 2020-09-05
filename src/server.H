@@ -33,7 +33,7 @@ struct server {
     };
 
     void on_connection(const client_id&, connection*);
-    void on_disconnection(const client_id&) {}
+    void on_disconnection(const client_id&);
 
   private:
     route_handler                                          route_handler_;
@@ -65,6 +65,16 @@ inline void SERVER_T::on_connection(const client_id& id, connection* con) {
 }
 
 SERVER_TEMPLATE_ARGS
+inline void SERVER_T::on_disconnection(const client_id& id) {
+    auto it = clients_.find(id);
+    if (it != std::end(clients_)) {
+        clients_.erase(it);
+    }
+}
+
+
+
+SERVER_TEMPLATE_ARGS
 inline SERVER_T::client::client(SERVER_T* s, connection* c)
     : connection_{c}, parent_{s} {
     connection_->listen(this);
@@ -72,15 +82,22 @@ inline SERVER_T::client::client(SERVER_T* s, connection* c)
 
 SERVER_TEMPLATE_ARGS
 inline void SERVER_T::client::on_data(const uint8_t* data, uint32_t len) {
-    auto empty_metadata = 0;
-    auto&& req = request::deserialize(data, len, empty_metadata);
+    auto   empty_metadata = 0;
+    auto&& req            = request::deserialize(data, len, empty_metadata);
     parent_->route_handler_.dispatch(this, req);
 }
 
 SERVER_TEMPLATE_ARGS
 inline void SERVER_T::client::send(const response& s) {
-    auto&& [data, len] = response::serialize(s);
-    connection_->send(data, len);
+    auto&&         buffer = serialize(s);
+    const uint8_t* data   = reinterpret_cast<const uint8_t*>(buffer.data());
+    connection_->send(data, buffer.size());
+}
+
+template <typename N, template <typename...> class RH, typename Req,
+          typename Resp>
+auto make_server(N& n, RH<Req, Resp>& rh) {
+    return server<N, RH, Req, Resp>(n, rh);
 }
 
 #undef SERVER_TEMPLATE_ARGS

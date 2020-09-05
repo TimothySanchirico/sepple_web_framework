@@ -39,6 +39,7 @@ enum class status_code { INVALID, OK = 200 };
 
 std::ostream& operator<<(std::ostream&, request_type);
 std::ostream& operator<<(std::ostream&, http_version);
+std::ostream& operator<<(std::ostream&, status_code);
 
 std::string type_string(request_type);
 std::string version_string(http_version);

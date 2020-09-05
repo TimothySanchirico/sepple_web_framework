@@ -71,6 +71,10 @@ std::string reason_phrase(status_code sc) {
         return "Unhandled";
     }
 }
+std::ostream& operator<<(std::ostream& os, status_code c) {
+    os << reason_phrase(c);
+    return os;
+}
 
 } // namespace http
 } // namespace shrek

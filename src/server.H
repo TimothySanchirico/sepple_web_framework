@@ -1,5 +1,6 @@
 #pragma once
 
+#include "http_response.H"
 #include "route_handler.H"
 
 #include <iostream>
@@ -8,6 +9,8 @@
 #include <unordered_map>
 
 namespace shrek {
+
+auto serialize(const auto& m) { return m.serialize(m); }
 
 // Glues the network listening with the request dispatching
 template <typename network_layer,
@@ -71,8 +74,6 @@ inline void SERVER_T::on_disconnection(const client_id& id) {
         clients_.erase(it);
     }
 }
-
-
 
 SERVER_TEMPLATE_ARGS
 inline SERVER_T::client::client(SERVER_T* s, connection* c)

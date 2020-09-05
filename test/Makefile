@@ -31,7 +31,7 @@ libnetpreload: network_preload.C libnetbridge
 
 network-test: netmocks_test.C libnetpreload
 	$(CXX) -o $(BUILD_DIR)/$@ $< $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) -lnetbridge -L $(BUILD_DIR) \
-&& LD_PRELOAD=$(BUILD_DIR)/libnetpreload.so ./$(BUILD_DIR)/$@
+&& LD_PRELOAD=$(BUILD_DIR)/libnetpreload.so:$(BUILD_DIR)/libnetbridge.so ./$(BUILD_DIR)/$@
 
 test-application: test_main.C libs
 	$(CXX) -o $(BUILD_DIR)/$@ $< $(LOCAL_OBJS) $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS)

@@ -59,17 +59,13 @@ inline void mock_network_layer::connection::listen(auto* l) {
 struct mock_response {
     mock_response(const std::string&);
 
-    static std::pair<const uint8_t*, uint32_t> serialize(const mock_response&);
-    std::string                                data_;
+    static std::string serialize(const mock_response&);
+    std::string        data_;
 };
 
 mock_response::mock_response(const std::string& s) : data_{s} {}
 
-std::pair<const uint8_t*, uint32_t>
-mock_response::serialize(const mock_response& r) {
-    return {reinterpret_cast<const uint8_t*>(r.data_.data()), r.data_.size()};
-}
-
+std::string mock_response::serialize(const mock_response& r) { return r.data_; }
 
 struct server_test : public testing::Test {
     virtual void SetUp() override;

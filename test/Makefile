@@ -4,15 +4,19 @@ OBJ = $(SRC:.C=.o)
 SHREKXXFLAGS = -std=c++17 -ggdb3
 
 BUILD_DIR = ../build/
-LOCAL_OBJS = $(BUILD_DIR)/http-request.o $(BUILD_DIR)/http-common.o $(BUILD_DIR)/http-response.o $(BUILD_DIR)/tcp-server.o
+LOCAL_OBJS = $(BUILD_DIR)/http-request.o $(BUILD_DIR)/http-common.o $(BUILD_DIR)/http-response.o $(BUILD_DIR)/tcp-server.o $(BUILD_DIR)/gzip.o
 SRC_DIR = ../src/
-LIBS = -lgtest -lgtest_main -lpthread -lgmock
+LIBS = -lgtest -lgtest_main -lpthread -lgmock -lz
 
 libs:
 	@cd ..; make libs
 
 request-test: request.C libs
 	$(CXX) -o $(BUILD_DIR)/$@ $< $(LOCAL_OBJS) $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./$(BUILD_DIR)/$@
+
+compression-test: compression_test.C libs
+	$(CXX) -o $(BUILD_DIR)/$@ $< $(LOCAL_OBJS) $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./$(BUILD_DIR)/$@
+
 
 response-test: response.C libs
 	$(CXX) -o $(BUILD_DIR)/$@ $< $(LOCAL_OBJS) $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS) && ./$(BUILD_DIR)/$@

@@ -1,16 +1,19 @@
 #include "network.H"
 
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <cstdlib>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <iostream>
+#include <mutex>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace shrek {
+
+// some clean up utilities to mitigate the failed to bind issues
 std::vector<int> fds() {
     static std::vector<int> cleanme;
     return cleanme;
@@ -20,7 +23,6 @@ void register_fd_for_cleanup(int fd) { fds().push_back(fd); }
 
 void do_cleanup() {
     for (auto fd : fds()) {
-        std::cout << "Closing fd=fd" << std::endl;
         close(fd);
     }
     fds().clear();
@@ -28,7 +30,6 @@ void do_cleanup() {
 
 tcp_server::tcp_server(uint16_t port) {
     sockfd_ = socket(AF_INET, SOCK_STREAM, 0ul);
-
 
     if (sockfd_ < 0) {
         perror("Failed to create socket");
@@ -48,7 +49,8 @@ void tcp_server::run() {
     }
 
     register_fd_for_cleanup(sockfd_);
-    std::atexit(do_cleanup);
+    static std::once_flag clean_up;
+    std::call_once(clean_up, []() { std::atexit(do_cleanup); });
 
     auto listen_ec = ::listen(sockfd_, 10);
     if (listen_ec != 0) {
@@ -79,7 +81,6 @@ void tcp_server::run() {
         // we generally have to close the connection for the webpage to render
         conn->close();
         on_disconnection_(id);
-
     }
     perror("Server died");
 }

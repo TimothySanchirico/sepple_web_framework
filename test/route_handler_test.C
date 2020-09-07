@@ -16,7 +16,7 @@ struct route_handler_test : public testing::Test {
         MOCK_METHOD1(send, void(const response&));
     };
 
-    request create_request(const std::string& endpoint);
+    std::string create_request(const std::string& endpoint);
 
   protected:
     std::unique_ptr<route_handler_t> route_handler;
@@ -27,20 +27,16 @@ void route_handler_test::SetUp() {
     route_handler = std::make_unique<route_handler_t>();
 }
 
-route_handler_test::request
+std::string
 route_handler_test::create_request(const std::string& endpoint) {
 
     const std::string sample_request = "GET " + endpoint +
                                        " HTTP/1.1\n"
                                        "Host: wttr.in\n"
                                        "User-Agent: curl/7.58.0\n"
-                                       "Accept: */*\n"
-                                       "\n";
-    auto empty_meta_data = 0;
-    auto req             = request::deserialize(
-        reinterpret_cast<const uint8_t*>(sample_request.data()),
-        sample_request.size(), empty_meta_data);
-    return req;
+                                       "Accept: */*\r\n"
+                                       "\r\n";
+    return sample_request;
 }
 
 TEST_F(route_handler_test, basic_dispatch_with_response) {
@@ -54,7 +50,8 @@ TEST_F(route_handler_test, basic_dispatch_with_response) {
     route_handler->add_endpoint(somewhere, handler);
 
     EXPECT_CALL(client, send(false)).Times(1);
-    route_handler->dispatch(std::addressof(client), req);
+
+    route_handler->dispatch(std::addressof(client), reinterpret_cast<const uint8_t*>(req.data()), req.size());
 
     ASSERT_EQ(flag, true);
 }
@@ -70,7 +67,7 @@ TEST_F(route_handler_test, basic_dispatch_with_no_response) {
     route_handler->add_endpoint(somewhere, handler);
 
     EXPECT_CALL(client, send(_)).Times(0);
-    route_handler->dispatch(std::addressof(client), req);
+    route_handler->dispatch(std::addressof(client), reinterpret_cast<const uint8_t*>(req.data()), req.size());
 
     ASSERT_EQ(flag, true);
 }

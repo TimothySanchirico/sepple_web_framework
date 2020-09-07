@@ -57,7 +57,6 @@ ssize_t recv(int sockfd, void* buf, size_t len, int flags) {
         std::copy(std::begin(data), std::end(data), b);
         return data.size();
     }
-
     return -1;
 }
 

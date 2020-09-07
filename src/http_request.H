@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -18,8 +19,8 @@ struct http_request {
     using request_type = http::request_type;
     using http_version = http::http_version;
 
-    static http_request deserialize(const uint8_t* data, uint32_t len,
-                                    auto&& metadata);
+    static std::optional<http_request> deserialize(const uint8_t* data,
+                                                   uint32_t       len);
 
     const std::string endpoint() const { return endpoint_; }
     const auto&       type() const { return type_; }
@@ -27,6 +28,8 @@ struct http_request {
     const auto&       meta() const { return meta_; }
     const auto&       cookies() const { return cookies_; }
     const auto&       data() const { return data_; }
+
+    std::optional<std::string> meta(const std::string& f) const;
 
     friend std::ostream& operator<<(std::ostream&, const http_request&);
 
@@ -64,12 +67,16 @@ struct http_request {
 };
 
 // where the work is
-inline http_request http_request::deserialize(const uint8_t* data, uint32_t len,
-                                              auto&& metadata) {
+inline std::optional<http_request>
+http_request::deserialize(const uint8_t* data, uint32_t len) {
     http_request req = {};
+    auto         s   = std::string(reinterpret_cast<const char*>(data), len);
+    auto header_end = s.find("\r\n\r\n");
+    if (header_end == std::string::npos) {
+        return std::nullopt;
+    }
 
-    std::stringstream stream(
-        std::string(reinterpret_cast<const char*>(data), len));
+    std::stringstream stream(s.substr(0, header_end));
 
     std::string t;
     stream >> t;
@@ -83,9 +90,23 @@ inline http_request http_request::deserialize(const uint8_t* data, uint32_t len,
     stream >> v;
     req.version_ = http::make_version(v);
 
-    // TODO fill in the other fields
+    // XXX this is shit
+    for (std::string line; std::getline(stream, line);) {
+        if (line.size() == 0) continue;
+        auto e     = line.find_first_of(':');
+        auto field = line.substr(0, e);
+        if (field == "Cookie") {
+            auto split = line.find_first_of('=');
+            auto name  = line.substr(e + 2, split - (e + 2));
+            auto value = line.substr(split + 1, line.size() - (split + 1));
+            req.cookies_[name] = value;
+        } else {
+            auto value       = line.substr(e + 2, line.size() - (e +  2));
+            req.meta_[field] = value;
+        }
+    }
 
-    // get the type
+    req.data_ = s.substr(header_end + 4, s.size() - (header_end + 4));
     return req;
 }
 

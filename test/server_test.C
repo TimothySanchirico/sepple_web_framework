@@ -66,6 +66,9 @@ struct mock_response {
 mock_response::mock_response(const std::string& s) : data_{s} {}
 
 std::string mock_response::serialize(const mock_response& r) { return r.data_; }
+std::ostream& operator<<(std::ostream& os, const mock_response& r) {
+    return os << mock_response::serialize(r);
+}
 
 struct server_test : public testing::Test {
     virtual void SetUp() override;
@@ -101,8 +104,8 @@ TEST_F(server_test, basic_connection_and_response) {
     const std::string req = "GET /test_endpoint HTTP/1.1\n"
                             "Host: wttr.in\n"
                             "User-Agent: curl/7.58.0\n"
-                            "Accept: */*\n"
-                            "\n";
+                            "Accept: */*\r\n"
+                            "\r\n";
     auto [id, c] = network_layer.create_connection();
     responder    = [](const request&) { return mock_response{"hello world"}; };
     // todo actually match the hello world

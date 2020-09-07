@@ -12,8 +12,12 @@ int main() {
     auto t  = tcp_server(5000);
     auto rh = route_handler<http_request, http_response>();
     rh.add_endpoint("/index.html", [](const http_request& req) {
-                              std::cout << "received request" << std::endl;
-                              return http_response{"Hello World"};
+                              auto&& r =  http_response{"Hello World"};
+                              r.set_cookie("test_cookie", "test_value");
+                              return r;
+                          });
+    rh.add_endpoint("/index2.html", [](const http_request& req) {
+                              return response_from_template("index.html");
                           });
     auto s = make_server(t, rh);
     std::cout << "Running..." << std::endl;

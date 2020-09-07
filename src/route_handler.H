@@ -12,7 +12,7 @@ template <typename request_t, typename response_t> struct route_handler {
     using endpoint =
         std::string; // xxx should be a function of the request type
 
-    void dispatch(auto* client, const request_t&);
+    void dispatch(auto* client, const uint8_t* data, uint32_t len);
 
     template <typename... F> void add_endpoint(const endpoint&, F&&...);
     template <typename... F> void set_default_handler(F&&... f);
@@ -27,14 +27,21 @@ template <typename request_t, typename response_t> struct route_handler {
 #define ROUTE_HANDLER_T route_handler<request_t, response_t>
 
 ROUTE_HANDLER_TEMPLATE
-inline void ROUTE_HANDLER_T::dispatch(auto* client, const request_t& req) {
+inline void ROUTE_HANDLER_T::dispatch(auto* client, const uint8_t* data, uint32_t len) {
+    auto req =  request_t::deserialize(data, len);
+    if (!req) {
+        std::cout << "[INCOMING]: {Invalid HTTP request}" << std::endl;
+        return;
+    }
 
-    const auto& key = req.endpoint();
+    std::cout << "[INCOMING]:" << *req << std::endl;
+    const auto& key = req->endpoint();
     auto        it  = response_generators_.find(key);
     const auto  resp =
-        it != std::end(response_generators_) ? it->second(req) : default_(req);
+        it != std::end(response_generators_) ? it->second(*req) : default_(*req);
 
     if (resp) {
+        std::cout << "[OUTGOING]:" << *resp << std::endl;
         client->send(*resp);
     }
 }

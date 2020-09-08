@@ -41,4 +41,4 @@ test-application: test_main.C libs
 	$(CXX) -o $(BUILD_DIR)/$@ $< $(LOCAL_OBJS) $(SHREKXXFLAGS) -I $(SRC_DIR) $(LIBS)
 
 
-test-all: request-test response-test route-handler-test server-test network-test
+test-all: request-test response-test route-handler-test server-test network-test compression-test

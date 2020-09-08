@@ -91,8 +91,6 @@ void tcp_server::connection::receive(const uint8_t* data, uint32_t len) {
 
 void tcp_server::connection::send(const uint8_t* data, uint32_t len) {
     auto r = ::send(fd_, data, len, 0);
-    std::cout << "[OUTGOING]" << std::string((const char*)data, len)
-              << std::endl;
     if (r < 0) {
         perror("Error sending");
     }

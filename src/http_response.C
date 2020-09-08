@@ -12,6 +12,10 @@ void http_response::set_cookie(const std::string& key,
     cookies_[key] = value;
 }
 
+void http_response::set_meta(const std::string& key, const std::string& value) {
+    meta_[key] = value;
+}
+
 // TODO make a file server
 std::string response_from_template(const std::string& filename) {
     std::ifstream      file{filename, std::ios_base::in};

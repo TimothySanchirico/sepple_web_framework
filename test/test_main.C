@@ -14,6 +14,7 @@ int main() {
     rh.add_endpoint("/index.html", [](const http_request& req) {
                               auto&& r =  http_response{"Hello World"};
                               r.set_cookie("test_cookie", "test_value");
+                              r.set_meta("Content-Encoding", "gzip");
                               return r;
                           });
     rh.add_endpoint("/index2.html", [](const http_request& req) {
